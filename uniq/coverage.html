@@ -1,0 +1,489 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>pkg: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/wonderf00l/go-park-vk/uniq/pkg/errors.go (0.0%)</option>
+				
+				<option value="file1">github.com/wonderf00l/go-park-vk/uniq/pkg/methods.go (96.0%)</option>
+				
+				<option value="file2">github.com/wonderf00l/go-park-vk/uniq/pkg/options.go (0.0%)</option>
+				
+				<option value="file3">github.com/wonderf00l/go-park-vk/uniq/pkg/uniquify.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Пакет uniq содержит код утилиты, может быть переиспользован в других пакетах
+// содержит файлы:
+// с логикой извлечения и обработки аргументов командной строки --&gt; options.go
+// с основными сущностями приложения --&gt; entities.go
+// с реализацией методов основных сущностей и их вспомогательными функциями --&gt; methods.go
+// с главными функциями приложения, куда импортируются все сущности --&gt; uniquify.go
+package uniq
+
+import "fmt"
+
+type ZeroStringError struct{}
+
+func (e *ZeroStringError) Error() string <span class="cov0" title="0">{
+        return "Got zero string: \"\""
+}</span>
+
+type WrongTemplateError struct {
+        S, Substr string
+}
+
+func (e *WrongTemplateError) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("\"%s\" not in \"%s\"", e.Substr, e.S)
+}</span>
+
+type InitError struct {
+        Data interface{}
+}
+
+func (err *InitError) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("Failed to provide data to Formater: %v", err.Data)
+}</span>
+
+type IncompatibleOptionsError struct {
+        Opts map[string]string
+}
+
+func (inc *IncompatibleOptionsError) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("Got incompatible arguments: %v", inc.Opts)
+}</span>
+
+type ExcessOptionsError struct {
+        Opts []string
+}
+
+func (exc *ExcessOptionsError) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("Got excess arguments: %v", exc.Opts)
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Пакет uniq содержит код утилиты, может быть переиспользован в других пакетах
+// содержит файлы:
+// с логикой извлечения и обработки аргументов командной строки --&gt; options.go
+// с основными сущностями приложения --&gt; entities.go
+// с реализацией методов основных сущностей и их вспомогательными функциями --&gt; methods.go
+// с главными функциями приложения, куда импортируются все сущности --&gt; uniquify.go
+package uniq
+
+import (
+        "fmt"
+        "io"
+        "strings"
+        "unicode/utf8"
+
+        "golang.org/x/text/unicode/norm"
+)
+
+// создание нового конфига с учетом полученных опций, инициализация основных сущностей
+func NewConfig(opts *Options) *Config <span class="cov0" title="0">{
+        return &amp;Config{
+                Comp: &amp;LexicographicalComparator{},
+                Proc: &amp;BaseProcessor{
+                        IgnoreReg:   opts.IgnoreReg,
+                        FieldOffset: opts.FieldOffset,
+                        CharOffset:  opts.CharOffset,
+                },
+                Formater: &amp;BaseFormater{CountRow: opts.CountRow, RepetitiveOnly: opts.RepetitiveOnly, UniqOnly: opts.UniqOnly},
+                Printer:  &amp;BasePrinter{},
+        }
+}</span>
+
+// Метод базового процессора: нормализует строку, пропускает FieldOffset полей, CharOffset символов
+func (pr *BaseProcessor) Process(s string) string <span class="cov10" title="498">{
+        s = norm.NFC.String(s)
+
+        if pr.IgnoreReg </span><span class="cov7" title="96">{
+                s = strings.ToLower(s)
+        }</span>
+        <span class="cov10" title="498">if pr.FieldOffset != 0 </span><span class="cov6" title="36">{
+                s = skipFields(s, pr.FieldOffset)
+        }</span>
+
+        <span class="cov10" title="498">if length := uint(utf8.RuneCountInString(s)); length &lt; pr.CharOffset </span><span class="cov2" title="3">{
+                pr.CharOffset = length // если будет ситуация "string"[len("string"):] --&gt; получим "", runtime ошибки не будет, аналогично и с []rune{}[len([]rune):]
+        }</span>
+
+        <span class="cov10" title="498">return string([]rune(s)[pr.CharOffset:])</span>
+}
+
+// Функция для конвертации в новую строку с учетом параметра FieldOffset
+func skipFields(s string, FieldOffset uint) string <span class="cov7" title="67">{
+        if s == "" </span><span class="cov2" title="2">{
+                return ""
+        }</span>
+        <span class="cov7" title="65">if FieldOffset == 0 </span><span class="cov3" title="6">{
+                return s
+        }</span>
+        <span class="cov6" title="59">if strings.IndexFunc(s, func(c rune) bool </span><span class="cov7" title="86">{ return c != ' ' &amp;&amp; c != '\t' &amp;&amp; c != '\n' }</span>) == -1 <span class="cov4" title="11">{
+                return ""
+        }</span>
+
+        <span class="cov6" title="48">startFrom := 0
+        fields := strings.Fields(s)
+        if FieldOffset &gt; uint(len(fields)) </span><span class="cov2" title="3">{
+                FieldOffset = uint(len(fields))
+        }</span>
+        <span class="cov6" title="48">lastSkipField := fields[FieldOffset-1]
+        startFrom, _ = getNewStrId(s, lastSkipField, count(lastSkipField, fields[:FieldOffset]))
+        startFrom++
+
+        return s[startFrom:]</span> // если будет ситуация "string"[len("string"):] --&gt; получим "", runtime ошибки не будет
+}
+
+// Вспомогательная функция для поиска позиции подстроки substr в строке s, с которой будет начинаться новая строка, в которой пропущено FieldOffset полей
+// offset - позиция поля в части строки, которую нужно откинуть, иначе говоря, какое именно из полей выбрать, если встретиться несколько одинаковых
+// сценарий с возвращением ошибки - для переиспользования, хотя функция SkipFields предусматривает обработку краевых занчений
+func getNewStrId(s, substr string, offset int) (int, error) <span class="cov7" title="79">{
+        if shouldBeProceed, pos, err := checkCredentials(s, substr, offset); !shouldBeProceed </span><span class="cov4" title="12">{
+                return pos, err
+        }</span>
+
+        <span class="cov7" title="67">var currFreq, currPos, endPos int
+        for currFreq &lt; offset </span><span class="cov7" title="114">{
+                if endPos &gt;= len(s) </span><span class="cov2" title="2">{
+                        return len(s) - 1, nil
+                }</span>
+                <span class="cov7" title="112">currPos = endPos + strings.Index(s[endPos:], substr) // shift str
+                endPos = currPos + (len(substr))
+                if currPos == 0 </span><span class="cov6" title="32">{
+                        if strings.Contains(" \t", string(s[endPos])) </span><span class="cov5" title="26">{
+                                currFreq++
+                        }</span>
+                } else<span class="cov7" title="80"> if endPos == len(s) </span><span class="cov4" title="12">{
+                        if strings.Contains(" \t", string(s[currPos-1])) </span><span class="cov4" title="12">{
+                                currFreq++
+                        }</span>
+                } else<span class="cov7" title="68"> if strings.Contains(" \t", string(s[currPos-1])) &amp;&amp; strings.Contains(" \t", string(s[endPos])) </span><span class="cov6" title="42">{
+                        currFreq++
+                }</span>
+        }
+
+        <span class="cov7" title="65">return currPos + (len(substr) - 1), nil</span>
+}
+
+// вспомогательная функция для подсчета частоты строки в слайсе строк, нужно для высчитывания позиции конкретного поля из множества полей строки(если одинаковых полей несколько)
+func count(s string, fields []string) int <span class="cov6" title="55">{
+        counter := 0
+
+        for _, str := range fields </span><span class="cov8" title="154">{
+                if str == s </span><span class="cov6" title="58">{
+                        counter++
+                }</span>
+        }
+
+        <span class="cov6" title="55">return counter</span>
+}
+
+// проверка строки s и подстроки substr, а также offset на краевые случаи
+// возвращает апрув на продолжение поиска новой позиции в обрабатываемой строке
+func checkCredentials(s, substr string, offset int) (bool, int, error) <span class="cov7" title="79">{
+        shouldBeProceed := true
+
+        if offset == 0 </span><span class="cov1" title="1">{
+                return false, 0, nil
+        }</span>
+        <span class="cov7" title="78">if s == "" || substr == "" </span><span class="cov2" title="3">{
+                return false, 0, &amp;ZeroStringError{}
+        }</span>
+        <span class="cov7" title="75">if !strings.Contains(s, substr) </span><span class="cov2" title="3">{
+                return false, 0, &amp;WrongTemplateError{Substr: substr, S: s}
+        }</span>
+        <span class="cov7" title="72">if s == substr </span><span class="cov3" title="5">{
+                return false, len(s) - 1, nil
+        }</span>
+
+        <span class="cov7" title="67">return shouldBeProceed, 0, nil</span>
+}
+
+// метод дефолтного компаратора
+func (lexComp *LexicographicalComparator) Compare(lhs, rhs string) bool <span class="cov5" title="24">{
+        return lhs == rhs
+}</span>
+
+// метод дефолтного форматера: конвертирует входную строку s с учетом опций приложения
+func (baseF *BaseFormater) Format(s string) string <span class="cov6" title="52">{
+        var formated string
+
+        if baseF.RowFreq &gt; 1 &amp;&amp; baseF.UniqOnly ||
+                baseF.RowFreq &lt;= 1 &amp;&amp; baseF.RepetitiveOnly </span><span class="cov5" title="18">{
+                return formated
+        }</span>
+        <span class="cov6" title="34">if baseF.CountRow </span><span class="cov5" title="17">{
+                return fmt.Sprintf("%7d %s", baseF.RowFreq, s)
+        }</span>
+
+        <span class="cov5" title="17">return s</span>
+}
+
+// функция для инициализации параметров форматера
+// для дефолтного форматера - частоты строки во входном потоке
+func ProvideDataToFormater(f Formater, data interface{}) error <span class="cov5" title="16">{
+        switch f.(type) </span>{
+        case *BaseFormater:<span class="cov5" title="16">
+                baseF, ok := f.(*BaseFormater)
+                if !ok </span><span class="cov0" title="0">{
+                        return &amp;InitError{data}
+                }</span>
+                <span class="cov5" title="16">switch data.(type) </span>{
+                case int:<span class="cov5" title="16">
+                        data_, ok_ := data.(int)
+                        if !ok_ </span><span class="cov0" title="0">{
+                                return &amp;InitError{data_}
+                        }</span> else<span class="cov5" title="16"> {
+                                baseF.RowFreq = data_
+                        }</span>
+                }
+        }
+
+        <span class="cov5" title="16">return nil</span>
+}
+
+// метод дефолтного принтера: пишем в out-поток
+func (baesPr *BasePrinter) Print(s string, out io.Writer) error <span class="cov5" title="16">{
+        _, err := out.Write([]byte(s))
+        return err
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Пакет uniq содержит код утилиты, может быть переиспользован в других пакетах
+// содержит файлы:
+// с логикой извлечения и обработки аргументов командной строки --&gt; options.go
+// с основными сущностями приложения --&gt; entities.go
+// с реализацией методов основных сущностей и их вспомогательными функциями --&gt; methods.go
+// с главными функциями приложения, куда импортируются все сущности --&gt; uniquify.go
+package uniq
+
+import (
+        "flag"
+)
+
+// Options хранит опции, поулчаемы из командной строки
+type Options struct {
+        InputFile      string
+        OutputFile     string
+        CountRow       bool
+        RepetitiveOnly bool
+        UniqOnly       bool
+        FieldOffset    uint
+        CharOffset     uint
+        IgnoreReg      bool
+}
+
+var incompatibleOpts = map[string][]string{
+        "d": {"u"},
+        "u": {"d"},
+}
+
+// проверка опций на совместимость
+func checkCompability(opts *Options) error <span class="cov0" title="0">{
+        if opts.RepetitiveOnly &amp;&amp; opts.UniqOnly </span><span class="cov0" title="0">{
+                return &amp;IncompatibleOptionsError{map[string]string{"-d": "-u"}}
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// извлечение опций, парсинг флагов
+func (opts *Options) parseFlags() error <span class="cov0" title="0">{
+        flag.BoolVar(&amp;opts.CountRow, "c", false, "count repetitive rows in input data")
+        flag.BoolVar(&amp;opts.RepetitiveOnly, "d", false, "provide repetitive rows only")
+        flag.BoolVar(&amp;opts.UniqOnly, "u", false, "provide uniq rows only")
+        flag.BoolVar(&amp;opts.IgnoreReg, "i", false, "ignore input data register")
+        flag.UintVar(&amp;opts.FieldOffset, "f", 0, "number of fields to skip(separated by whitespaces)")
+        flag.UintVar(&amp;opts.CharOffset, "s", 0, "number of chars to skip")
+        flag.Parse()
+
+        if length := len(flag.Args()); length &lt;= 2 </span><span class="cov0" title="0">{
+                opts.InputFile, opts.OutputFile = flag.Arg(0), flag.Arg(1)
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">return &amp;ExcessOptionsError{flag.Args()[2:]}</span>
+}
+
+// создание опций с проверкой входных параметров
+func NewOptions() (*Options, error) <span class="cov0" title="0">{
+        var opts Options
+
+        if parseErr := opts.parseFlags(); parseErr != nil </span><span class="cov0" title="0">{
+                return &amp;Options{}, parseErr
+        }</span>
+        <span class="cov0" title="0">if compatErr := checkCompability(&amp;opts); compatErr != nil </span><span class="cov0" title="0">{
+                return &amp;Options{}, compatErr
+        }</span>
+
+        <span class="cov0" title="0">return &amp;opts, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Пакет uniq содержит код утилиты, может быть переиспользован в других пакетах
+// содержит файлы:
+// с логикой извлечения и обработки аргументов командной строки --&gt; options.go
+// с основными сущностями приложения --&gt; entities.go
+// с реализацией методов основных сущностей и их вспомогательными функциями --&gt; methods.go
+// с главными функциями приложения, куда импортируются все сущности --&gt; uniquify.go
+package uniq
+
+import (
+        "bufio"
+        "io"
+)
+
+// вспомогательная функция для просмотра входного потока до '\n' включительно с сохранением позиции
+func peekLine(in *bufio.Reader) ([]byte, error) <span class="cov6" title="39">{
+        var line, symbols []byte
+        var err error
+        i := 0
+
+        for ; err == nil; i++ </span><span class="cov10" title="470">{
+                symbols, err = in.Peek(1 + i)
+                if err == io.EOF || symbols[len(symbols)-1] == 10 </span><span class="cov6" title="39">{
+                        break</span>
+                }
+        }
+        <span class="cov6" title="39">if err != nil </span><span class="cov4" title="8">{
+                return []byte{}, err
+        }</span>
+        <span class="cov6" title="31">line = append(line, symbols...)
+        return line, err</span>
+}
+
+// построчное чтение входного потока данных, в качестве разделителя - '\n':
+// для текущей строки ищем дубликаты с учетом переданных опций
+// для сохранения состояния входного потока в случае считывания "новой" строки, не дубликата,
+// используется PeekLine, если же строка оказалось дубликатом, сдвигаем позицию во входном потоке
+// до следующей строки
+// далее строка форматируется и выводится в выходной поток
+func Uniquify(in io.Reader, out io.Writer, config *Config) error <span class="cov3" title="4">{
+        src := bufio.NewReader(in)
+        var err error
+        var currLine string
+
+        for err == nil </span><span class="cov5" title="16">{
+                currLine, err = src.ReadString('\n')
+                lineCount := 1
+                var nextLine []byte
+                for err == nil </span><span class="cov5" title="28">{
+                        nextLine, err = peekLine(src)
+                        if err == io.EOF ||
+                                !config.Comp.Compare(config.Proc.Process(currLine), config.Proc.Process(string(nextLine))) </span><span class="cov5" title="16">{
+                                break</span>
+                        }
+                        <span class="cov4" title="12">lineCount++
+                        _, _ = src.ReadString('\n')</span> // прочитываем строку, сдвигаем указатель
+                }
+                <span class="cov5" title="16">ProvideDataToFormater(config.Formater, lineCount)
+                formatedOutput := config.Formater.Format(currLine)
+                config.Printer.Print(formatedOutput, out)</span>
+        }
+
+        <span class="cov3" title="4">return err</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

@@ -1,0 +1,10 @@
+<html>
+<body>
+	<h1>Users</h1>
+	{{range .Users}}
+		<b>{{.Name}}</b>
+		{{if eq .Active eq 1 1}}active{{end}}
+		<br />
+	{{end}}
+</body>
+</html>

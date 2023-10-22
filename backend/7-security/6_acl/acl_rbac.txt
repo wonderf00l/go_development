@@ -1,0 +1,71 @@
+ACL:
+Access Control List
+
+кто что и что делает?
+alice /menu write
+bob /menu read
+
+/admin/user/edit
+    userid=1
+    userid=2
+    userid=3
+/admin/user/moderate
+    userid=1
+
+-------
+
+userid=1
+    /admin/user/edit
+    /admin/user/moderate
+
+userid=2
+    /admin/user/edit
+
+userid=3
+    /admin/user/edit
+
+
+-------------------------------
+
+RBAC:
+Role Based Access Control
+
+client
+    /menu read
+    /order write
+owner
+    /menu read
+    /menu write
+    /orders read
+
+user_id; role
+1; user
+2; moderator
+3; admin
+
+
+
+/admin/user/edit
+    moderator
+    admin
+/admin/user/moderate
+    admin
+
+-------
+
+admin
+    /admin/user/edit
+    /admin/user/moderate
+
+
+
+------
+
+https://github.com/casbin/casbin
+
+
+type Session struct {
+    ID string
+    UserID string
+    Role string
+}
