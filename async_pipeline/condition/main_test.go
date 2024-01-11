@@ -1,4 +1,4 @@
-package main
+package pipe
 
 import (
 	"fmt"
@@ -175,7 +175,6 @@ func TestParallelPiplines(t *testing.T) {
 			}
 		}),
 	)
-
 	wg.Wait()
 
 	expectedTime := 2700 * time.Millisecond
